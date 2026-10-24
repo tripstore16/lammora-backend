@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="description" content="Lammora — لوحة التحكم عن بعد.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Lammora — لوحة التحكم</title>
+  <link rel="icon" type="image/webp" href="/assets/images/lammora.webp">
+  <link rel="stylesheet" href="/css/remote.css">
+</head>
+<body class="remote-body">
+  <a class="skip-link" href="#main">تخطَّ إلى المحتوى</a>
+
+  <header class="remote-header">
+    <div class="remote-header-inner">
+      <a class="remote-brand" href="/camera" aria-label="Lammora">
+        <img src="/assets/images/lammora.webp" alt="شعار Lammora" class="remote-logo" width="36" height="36">
+        <div class="remote-brand-text">
+          <span class="remote-brand-name">Lammora</span>
+          <span class="remote-brand-sub">لوحة التحكم</span>
+        </div>
+      </a>
+      <div class="remote-header-actions">
+        <a href="/gallery" class="btn btn-ghost btn-sm">المعرض</a>
+        <button type="button" class="btn btn-danger btn-sm" id="logoutBtn">خروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="remote-main">
+    <section class="remote-stage-wrap" aria-label="معاينة الكاميرا المباشرة">
+      <div class="remote-stage" id="remoteStage">
+        <video id="remoteVideo" class="remote-video" autoplay playsinline muted aria-label="معاينة الكاميرا من الموبايل المثبّت"></video>
+
+        <div class="remote-stage-overlay" aria-hidden="true">
+          <div class="overlay-corner overlay-corner-tl"></div>
+          <div class="overlay-corner overlay-corner-tr"></div>
+          <div class="overlay-corner overlay-corner-bl"></div>
+          <div class="overlay-corner overlay-corner-br"></div>
+          <div class="overlay-grid"></div>
+        </div>
+
+        <div class="stage-status" id="stageStatus" data-state="idle">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span class="status-text" id="stageStatusText">غير متصل</span>
+        </div>
+
+        <div class="stage-idle" id="stageIdle">
+          <div class="stage-idle-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="6" width="18" height="13" rx="2"/>
+              <circle cx="12" cy="12.5" r="3.5"/>
+              <path d="M8 6l1.5-2h5L16 6"/>
+            </svg>
+          </div>
+          <h2 class="stage-idle-title">بانتظار اتصال الكاميرا</h2>
+          <p class="stage-idle-text">افتح صفحة الكاميرا على الموبايل المثبّت على الترايبود، واضغط "تشغيل الكاميرا". بعد كده اضغط "اقتران" من هنا.</p>
+          <button type="button" class="btn btn-primary" id="pairBtn">اقتران الكاميرا</button>
+        </div>
+
+        <div class="countdown-overlay" id="countdownOverlay" hidden aria-live="polite">
+          <span class="countdown-number" id="countdownNumber">0</span>
+        </div>
+
+        <div class="remote-banner" id="remoteBanner" hidden></div>
+      </div>
+
+      <div class="stage-controls">
+        <button type="button" class="btn btn-ghost btn-sm" id="fullscreenBtn">ملء الشاشة</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="reconnectBtn">إعادة الاتصال</button>
+      </div>
+    </section>
+
+    <aside class="remote-sidebar" aria-label="لوحة التحكم">
+      <div class="panel">
+        <h2 class="panel-title">حالة النظام</h2>
+        <dl class="status-list">
+          <div class="status-item">
+            <dt>الكاميرا</dt>
+            <dd id="cameraStatus" data-state="idle">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span class="status-text">غير متصلة</span>
+            </dd>
+          </div>
+          <div class="status-item">
+            <dt>الفيديو</dt>
+            <dd id="videoStatus" data-state="idle">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span class="status-text">متوقف</span>
+            </dd>
+          </div>
+          <div class="status-item">
+            <dt>آخر تصوير</dt>
+            <dd id="lastCaptureStatus" data-state="idle">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span class="status-text">لا يوجد</span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">العدّاد التنازلي</h2>
+        <div class="countdown-presets" role="radiogroup" aria-label="مدة العد التنازلي">
+          <button type="button" class="preset-btn" data-seconds="0" role="radio" aria-checked="false">0</button>
+          <button type="button" class="preset-btn" data-seconds="3" role="radio" aria-checked="false">3</button>
+          <button type="button" class="preset-btn" data-seconds="5" role="radio" aria-checked="true">5</button>
+          <button type="button" class="preset-btn" data-seconds="10" role="radio" aria-checked="false">10</button>
+          <button type="button" class="preset-btn" data-seconds="15" role="radio" aria-checked="false">15</button>
+          <button type="button" class="preset-btn" data-seconds="30" role="radio" aria-checked="false">30</button>
+        </div>
+        <div class="field">
+          <label for="customCountdown">مدة مخصصة (ثانية)</label>
+          <input type="number" id="customCountdown" class="input" min="0" max="60" step="1" placeholder="من 0 إلى 60" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">التصوير</h2>
+        <button type="button" class="shutter-btn" id="shutterBtn" disabled aria-label="التقاط صورة">
+          <span class="shutter-inner">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="8"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+        </button>
+        <p class="shutter-note" id="shutterNote">اختر مدة العدّاد، ثم اضغط الغالق.</p>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">آخر صورة</h2>
+        <div class="last-photo" id="lastPhotoWrap" hidden>
+          <button type="button" class="last-photo-btn" id="lastPhotoBtn" aria-label="عرض آخر صورة">
+            <img id="lastPhotoImg" alt="آخر صورة تم التقاطها" loading="lazy">
+          </button>
+          <p class="last-photo-meta" id="lastPhotoMeta"></p>
+        </div>
+        <p class="empty-text" id="lastPhotoEmpty">لم يتم التقاط صور بعد في هذه الجلسة.</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="remote-footer">
+    <p class="footer-tagline">كل لمّة وليها حكاية</p>
+    <p class="footer-copy">© <span id="year"></span> Lammora</p>
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="عرض الصورة">
+    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="إغلاق">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    <figure class="lightbox-figure">
+      <img id="lightboxImage" alt="" class="lightbox-image">
+      <figcaption id="lightboxCaption" class="lightbox-caption"></figcaption>
+    </figure>
+    <div class="lightbox-actions">
+      <a id="lightboxDownload" class="btn btn-primary btn-sm" href="#" download rel="noopener">تنزيل الصورة</a>
+    </div>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/shared/ui.js"></script>
+  <script src="/js/shared/api.js"></script>
+  <script src="/js/shared/socket.js"></script>
+  <script src="/js/shared/webrtc.js"></script>
+  <script src="/js/remote.js"></script>
+</body>
+</html>
